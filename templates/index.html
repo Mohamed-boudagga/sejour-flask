@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Durée de séjour hospitalier</title>
+  <meta name="description" content="Estimation de la durée d'hospitalisation des patients diabétiques par apprentissage automatique.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Projet Machine Learning · Régression</p>
+    <h1>Durée de séjour des patients diabétiques</h1>
+    <p class="lead">Estimez combien de jours un patient diabétique restera hospitalisé, pour mieux organiser les lits et les équipes.</p>
+  </div>
+</header>
+
+<main class="wrap">
+{% if error %}
+  <section class="card notice notice-error" role="alert">
+    <h2>Service indisponible</h2>
+    <p>{{ error }}</p>
+  </section>
+{% else %}
+  <div class="tabs" role="tablist" aria-label="Choix du scénario">
+    {% for key, sc in schema.items() %}
+    <button class="tab" role="tab" id="tab-{{ key }}" aria-controls="panel-{{ key }}"
+            aria-selected="{{ 'true' if loop.first else 'false' }}" data-target="{{ key }}">
+      <span class="tab-title">{{ sc.titre }}</span>
+      <span class="tab-sub">Scénario {{ key }}</span>
+    </button>
+    {% endfor %}
+  </div>
+
+  {% for key, sc in schema.items() %}
+  <section class="panel" role="tabpanel" id="panel-{{ key }}" aria-labelledby="tab-{{ key }}"
+           {% if not loop.first %}hidden{% endif %}>
+    <div class="grid">
+      <form class="card" data-scenario="{{ key }}" novalidate>
+        <h2>{{ sc.sous_titre }}</h2>
+        <p class="muted">{{ sc.usage }}</p>
+        <div class="fields">
+          {% for f in sc.fields %}
+          <div class="field">
+            <label for="{{ key }}-{{ f.name }}">{{ f.label }}</label>
+            {% if f.type == 'select' %}
+            <select id="{{ key }}-{{ f.name }}" name="{{ f.name }}" required>
+              {% if not f.default %}<option value="" disabled selected>Choisir…</option>{% endif %}
+              {% for o in f.options %}
+              <option value="{{ o.value }}" {% if f.default and o.value == f.default %}selected{% endif %}>{{ o.label }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <input id="{{ key }}-{{ f.name }}" name="{{ f.name }}" type="number" inputmode="numeric"
+                   min="{{ f.min }}" max="{{ f.max }}" step="1" value="{{ f.default }}" required>
+            {% endif %}
+            {% if f.help %}<small class="help">{{ f.help }}</small>{% endif %}
+            <small class="err" data-err="{{ f.name }}" role="alert"></small>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn">Estimer la durée</button>
+      </form>
+
+      <aside class="card result-card" aria-live="polite">
+        <div class="result-empty">
+          <p class="muted">Remplissez le formulaire puis cliquez sur « Estimer la durée » : le résultat s'affichera ici.</p>
+        </div>
+        <div class="result" hidden>
+          <p class="result-label">Durée estimée</p>
+          <p class="result-value"><span data-r="jours">–</span> <small>jours</small></p>
+          <p class="badge" data-r="categorie"></p>
+          <div class="scale" aria-hidden="true">
+            <div class="scale-range" data-r="range"></div>
+            <div class="scale-dot" data-r="dot"></div>
+          </div>
+          <div class="scale-ticks" aria-hidden="true"><span>1</span><span>7</span><span>14 jours</span></div>
+          <p class="result-range">Intervalle probable : <strong data-r="intervalle"></strong>
+             <span class="muted">(marge d'erreur moyenne du modèle : ± <span data-r="marge"></span> j)</span></p>
+          <p class="reliab" data-r="fiabilite"></p>
+          <ul class="warnings" data-r="avertissements"></ul>
+        </div>
+        <p class="api-error" data-r="erreur" hidden role="alert"></p>
+      </aside>
+    </div>
+  </section>
+  {% endfor %}
+
+  <section class="card about">
+    <h2>À propos du projet</h2>
+    <dl>
+      <dt>Objectif métier</dt>
+      <dd>Optimiser l'organisation des ressources hospitalières en anticipant la durée des séjours.</dd>
+      <dt>Objectif de data science</dt>
+      <dd>Estimer la durée d'hospitalisation des patients diabétiques à partir de leurs données cliniques et hospitalières (régression).</dd>
+      <dt>Données</dt>
+      <dd>Diabetes 130-US Hospitals (1999-2008) : {{ "{:,}".format(meta.n_train).replace(",", " ") }} patients pour l'entraînement, un seul séjour par patient, durées de 1 à 14 jours.</dd>
+      <dt>Modèles retenus</dt>
+      <dd>
+        <ul class="models">
+        {% for key, sc in schema.items() %}
+          <li><strong>Scénario {{ key }} ({{ sc.titre }})</strong> : {{ sc.modele }}
+            — erreur moyenne {{ "%.2f"|format(sc.performances.mae)|replace(".", ",") }} jour,
+            R² = {{ "%.2f"|format(sc.performances.r2)|replace(".", ",") }} sur des patients jamais vus.</li>
+        {% endfor %}
+        </ul>
+      </dd>
+    </dl>
+    <p class="disclaimer"><strong>Projet pédagogique.</strong> Cette estimation n'est pas un avis médical et ne doit pas servir à décider
+       de la prise en charge d'un patient. La durée de séjour dépend de facteurs absents des données (gravité détaillée,
+       organisation du service, situation sociale) ; les données datent de 1999-2008 et viennent d'hôpitaux américains.</p>
+    <p class="muted">Interface de programmation : <code>POST /api/predict</code> · <code>GET /api/schema</code> · <code>GET /health</code></p>
+  </section>
+{% endif %}
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
