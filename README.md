@@ -1,24 +1,27 @@
-# Prédiction de l'issue du séjour – Gradient Boosting
+# Projet ML · Patients diabétiques
 
-Application Flask autonome (projet ML « Parcours hospitalier des patients diabétiques », Eya Ouali).
+Un seul site Flask, deux outils :
 
-## Lancer en local
-    pip install -r requirements.txt
-    python app.py          # http://127.0.0.1:5000
+| Adresse    | Outil                                             | Code            |
+|------------|---------------------------------------------------|-----------------|
+| `/`        | Accueil (navigation)                              | `app.py`        |
+| `/sejour/` | Durée de séjour (scénarios A et B)                | `sejour_app.py` |
+| `/issue/`  | Issue du séjour (risque de décès)                 | `issue_app.py`  |
+| `/health`  | État du service                                   | `app.py`        |
 
-## API JSON
-    curl -X POST http://127.0.0.1:5000/api/predict -H "Content-Type: application/json" \
-         -d '{"AGE": 70, "UREA": 120, "CREATININE": 3, "EF": 25, "SHOCK": 1, "EMERGENCY": 1}'
+API JSON : `POST /sejour/api/predict`, `GET /sejour/api/schema`, `POST /issue/api/predict`.
 
-## Déployer sur Render
-1. Pousser ce dossier sur un dépôt GitHub (avec `pipeline_deploiement.joblib`).
-2. Render > New > Web Service > connecter le dépôt.
-3. Build : `pip install -r requirements.txt` · Start : `gunicorn app:app` (ou utiliser `render.yaml`).
-4. Variable d'environnement `PYTHON_VERSION` = 3.12.7 (ou une version 3.11+ disponible).
+## Ajouter un 3e modèle plus tard
+1. Créer `mon_modele_app.py` avec un `Blueprint("mon_modele", __name__, url_prefix="/mon_modele")`.
+2. Mettre le modèle dans `models/mon_modele/` et la page dans `templates/mon_modele.html`.
+3. Dans `app.py` : `import mon_modele_app` puis `app.register_blueprint(mon_modele_app.bp)`.
+4. Ajouter un lien dans `templates/_nav.html` et une carte dans `templates/accueil.html`.
 
-## Important
-- `scikit-learn==1.8.0` est figé : le fichier .joblib doit être lu avec la version qui l'a créé.
-- Le fichier `pipeline_deploiement.joblib` est généré par le notebook (section 3.9) et contient le modèle, l'imputeur, les bornes, la calibration du score de décès et les niveaux de risque.
-- Les probabilités brutes du modèle sont gonflées par les poids de classes. L'application affiche donc un **risque de décès calibré** (Platt sur prédictions hors-échantillon du train). Vérification sur le test : Brier 0,0305 → 0,0249, et taux de décès prédit proche du taux observé par niveau.
-- Niveaux (test) : faible < 1 % (0,3 % de décès observés), modéré 1–5 % (1,5 %), élevé 5–20 % (10,1 %), très élevé ≥ 20 % (66,7 %).
-- Sur l'offre gratuite de Render, le premier chargement après inactivité peut prendre une minute.
+## Render
+- Build : `pip install -r requirements.txt` · Start : `gunicorn app:app --workers 1 --threads 4 --timeout 120`
+- Variable `PYTHON_VERSION` = `3.12.7`
+
+## Important : versions
+`requirements.txt` fige `scikit-learn==1.8.0` (version du modèle « issue »). Le modèle « durée de séjour » a été
+entraîné avec la 1.6.1 : `compat.py` permet de le relire. Pour une compatibilité propre, ré-exportez ce modèle
+depuis son notebook avec scikit-learn 1.8.0 et remplacez les fichiers de `models/sejour/`.

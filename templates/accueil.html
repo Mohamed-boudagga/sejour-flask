@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Projet ML · Patients diabétiques</title>
+<style>
+:root{--bg:#07142b;--card:#0c1f3f;--bd:#26405f;--tx:#eaf1ff;--mu:#93a4bf;--ac:#38c8f5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 20px 56px}
+.eyebrow{color:var(--ac);font-weight:700;letter-spacing:.1em;font-size:.85rem;margin:0}
+h1{margin:6px 0 8px;font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.15}
+.lead{color:var(--mu);max-width:62ch;margin:0 0 28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{display:block;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:26px;color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--ac);outline:none}
+.card h2{margin:0 0 8px;font-size:1.3rem;color:var(--ac)}
+.card p{margin:0 0 18px;color:var(--mu)}
+.go{display:inline-block;background:var(--ac);color:#07142b;font-weight:800;border-radius:10px;padding:10px 18px}
+.err{background:#3a1620;border:1px solid #ef5b5b;border-radius:12px;padding:12px 16px;margin-bottom:20px}
+footer{color:var(--mu);font-size:.82rem;margin-top:32px}
+</style></head><body>
+{% set active = 'accueil' %}{% include '_nav.html' %}
+<div class="wrap">
+  <p class="eyebrow">PROJET MACHINE LEARNING</p>
+  <h1>Parcours hospitalier des patients diabétiques</h1>
+  <p class="lead">Deux modèles complémentaires : l'un estime la durée de séjour, l'autre prédit l'issue du séjour. Choisissez un outil.</p>
+  {% if erreur %}<div class="err" role="alert">{{ erreur }}</div>{% endif %}
+  <div class="cards">
+    <a class="card" href="{{ url_for('sejour.index') }}">
+      <h2>Durée de séjour</h2>
+      <p>Estimez combien de jours un patient restera hospitalisé, à l'admission ou en cours de séjour (régression).</p>
+      <span class="go">Ouvrir →</span>
+    </a>
+    <a class="card" href="{{ url_for('issue.index') }}">
+      <h2>Issue du séjour</h2>
+      <p>Évaluez le risque de décès d'un patient à partir de son profil et de sa biologie (Gradient Boosting).</p>
+      <span class="go">Ouvrir →</span>
+    </a>
+  </div>
+  <footer>Projet pédagogique : ces estimations ne sont pas un avis médical.</footer>
+</div>
+</body></html>

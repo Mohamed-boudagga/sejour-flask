@@ -1,0 +1,14 @@
+<style>
+.sitenav{background:#061225;border-bottom:1px solid #26405f;font:600 .92rem/1.2 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.sitenav .in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sitenav a{color:#cfe0f5;text-decoration:none;padding:8px 14px;border-radius:999px}
+.sitenav a:hover{background:#12294b;color:#fff}
+.sitenav a.on{background:#38c8f5;color:#07142b}
+.sitenav .brand{margin-right:auto;color:#fff;font-weight:800}
+</style>
+<nav class="sitenav" aria-label="Navigation principale"><div class="in">
+  <a class="brand" href="{{ url_for('accueil') }}">Patients diabétiques · ML</a>
+  <a href="{{ url_for('accueil') }}" {% if active == 'accueil' %}class="on"{% endif %}>Accueil</a>
+  <a href="{{ url_for('sejour.index') }}" {% if active == 'sejour' %}class="on"{% endif %}>Durée de séjour</a>
+  <a href="{{ url_for('issue.index') }}" {% if active == 'issue' %}class="on"{% endif %}>Issue du séjour</a>
+</div></nav>

@@ -1,0 +1,175 @@
+{
+  "sklearn_version": "1.6.1",
+  "n_train": 55976,
+  "scenarios": {
+    "A": {
+      "nom_scenario": "A - à l'admission",
+      "modele": "Modèle 2 - Random Forest",
+      "numeriques": [
+        "age_num",
+        "number_outpatient",
+        "number_emergency",
+        "number_inpatient"
+      ],
+      "categorielles": [
+        "gender",
+        "race",
+        "admission_type_id",
+        "admission_source_id",
+        "payer_code",
+        "medical_specialty",
+        "diag_1_group"
+      ],
+      "performances": {
+        "mae": 2.18174929242967,
+        "rmse": 2.812103559738242,
+        "r2": 0.07382062768639408
+      },
+      "taille_mo": 12.0
+    },
+    "B": {
+      "nom_scenario": "B - enrichi pendant le séjour",
+      "modele": "Modèle 3 - Gradient Boosting",
+      "numeriques": [
+        "age_num",
+        "number_outpatient",
+        "number_emergency",
+        "number_inpatient",
+        "num_lab_procedures",
+        "num_procedures",
+        "num_medications",
+        "number_diagnoses",
+        "n_meds_active",
+        "n_meds_changed"
+      ],
+      "categorielles": [
+        "gender",
+        "race",
+        "admission_type_id",
+        "admission_source_id",
+        "payer_code",
+        "medical_specialty",
+        "diag_1_group",
+        "A1Cresult",
+        "max_glu_serum",
+        "change",
+        "diabetesMed"
+      ],
+      "performances": {
+        "mae": 1.681697547326318,
+        "rmse": 2.235927569749898,
+        "r2": 0.41447162521067504
+      },
+      "taille_mo": 0.2
+    }
+  },
+  "plafonds": {
+    "age_num": 95.0,
+    "n_meds_active": 4.0,
+    "n_meds_changed": 2.0,
+    "num_lab_procedures": 85.0,
+    "num_medications": 44.0,
+    "num_procedures": 6.0,
+    "number_diagnoses": 9.0,
+    "number_emergency": 2.0,
+    "number_inpatient": 3.0,
+    "number_outpatient": 4.0
+  },
+  "options": {
+    "A1Cresult": [
+      "NotTested",
+      ">8",
+      "Norm",
+      ">7"
+    ],
+    "admission_source_id": [
+      "7",
+      "1",
+      "17",
+      "4",
+      "6",
+      "2",
+      "5",
+      "20",
+      "3",
+      "9",
+      "8",
+      "10",
+      "22",
+      "25",
+      "14",
+      "11"
+    ],
+    "admission_type_id": [
+      "1",
+      "3",
+      "2",
+      "6",
+      "5",
+      "8",
+      "7",
+      "4"
+    ],
+    "change": [
+      "No",
+      "Ch"
+    ],
+    "diabetesMed": [
+      "Yes",
+      "No"
+    ],
+    "diag_1_group": [
+      "Circulatory",
+      "Other",
+      "Respiratory",
+      "Digestive",
+      "Diabetes",
+      "Injury",
+      "Musculoskeletal",
+      "Genitourinary",
+      "Neoplasms",
+      "Unknown"
+    ],
+    "gender": [
+      "Female",
+      "Male"
+    ],
+    "max_glu_serum": [
+      "NotTested",
+      "Norm",
+      ">200",
+      ">300"
+    ],
+    "medical_specialty": [
+      "Unknown",
+      "InternalMedicine",
+      "Family/GeneralPractice",
+      "Emergency/Trauma",
+      "Cardiology",
+      "Surgery-General",
+      "Orthopedics",
+      "Orthopedics-Reconstructive",
+      "Radiologist",
+      "Nephrology"
+    ],
+    "payer_code": [
+      "Unknown",
+      "MC",
+      "HM",
+      "BC",
+      "SP",
+      "MD",
+      "CP",
+      "UN",
+      "CM"
+    ],
+    "race": [
+      "Caucasian",
+      "AfricanAmerican",
+      "Unknown",
+      "Hispanic",
+      "Other",
+      "Asian"
+    ]
+  }
+}
