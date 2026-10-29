@@ -1,0 +1,72 @@
+{
+  "best_model": "XGBoost",
+  "all_models": {
+    "Logistic Regression": {
+      "cv_roc_auc_train": 0.6421398121503552,
+      "test_roc_auc": 0.6436061657262303,
+      "test_pr_auc": 0.1531149630464334,
+      "recall": 0.45664280031821797,
+      "precision": 0.14646593518754786,
+      "f1": 0.22179289026275115,
+      "threshold": 0.5381966382776388,
+      "top10_capture": 0.2060461416070008,
+      "best_params": {
+        "C": 0.01
+      }
+    },
+    "Decision Tree": {
+      "cv_roc_auc_train": 0.6318597635390326,
+      "test_roc_auc": 0.6262642411818048,
+      "test_pr_auc": 0.14936325926827926,
+      "recall": 0.35799522673031026,
+      "precision": 0.16423357664233576,
+      "f1": 0.22516887665749313,
+      "threshold": 0.5849201255100349,
+      "top10_capture": 0.2203659506762132,
+      "best_params": {
+        "max_depth": 6,
+        "min_samples_leaf": 400
+      }
+    },
+    "XGBoost": {
+      "cv_roc_auc_train": 0.6503124805683166,
+      "test_roc_auc": 0.6513822882260409,
+      "test_pr_auc": 0.17083809371842262,
+      "recall": 0.43516308671439935,
+      "precision": 0.15882694541231127,
+      "f1": 0.23271644330993405,
+      "threshold": 0.5513902902603149,
+      "top10_capture": 0.23786793953858393,
+      "best_params": {
+        "subsample": 0.7,
+        "n_estimators": 300,
+        "min_child_weight": 10,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "colsample_bytree": 1.0
+      }
+    }
+  },
+  "selected_variables": [
+    "discharge_group",
+    "diag_2_group",
+    "diag_1_group",
+    "num_medications",
+    "medical_specialty",
+    "diag_3_group",
+    "number_inpatient",
+    "payer_code",
+    "meds_per_day",
+    "age_num",
+    "number_diagnoses",
+    "admission_source",
+    "labs_per_day",
+    "diabetesMed",
+    "time_in_hospital",
+    "num_lab_procedures",
+    "insulin",
+    "admission_type",
+    "total_visits",
+    "A1Cresult"
+  ]
+}

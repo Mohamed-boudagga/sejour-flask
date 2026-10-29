@@ -1,6 +1,6 @@
 # Projet ML · Patients diabétiques
 
-Un seul site Flask, quatre outils :
+Un seul site Flask, cinq outils :
 
 | Adresse    | Outil                                             | Code            |
 |------------|---------------------------------------------------|-----------------|
@@ -9,9 +9,10 @@ Un seul site Flask, quatre outils :
 | `/issue/`  | Issue du séjour (risque de décès)                 | `issue_app.py`  |
 | `/medicaments/` | Nombre de médicaments (régression, LightGBM) | `medicaments_app.py` |
 | `/readmission/` | Réadmission à 30 jours (classification, XGBoost) | `readmission_app.py` |
+| `/profils/` | Profils de santé (clustering K-Means, CDC Diabetes) | `profils_app.py` |
 | `/health`  | État du service                                   | `app.py`        |
 
-API JSON : `POST /sejour/api/predict`, `GET /sejour/api/schema`, `POST /issue/api/predict`, `POST /medicaments/api/predict`, `GET /medicaments/api/schema`, `POST /readmission/api/predict`, `GET /readmission/api/schema`.
+API JSON : `POST /profils/api/predict`, `POST /sejour/api/predict`, `GET /sejour/api/schema`, `POST /issue/api/predict`, `POST /medicaments/api/predict`, `GET /medicaments/api/schema`, `POST /readmission/api/predict`, `GET /readmission/api/schema`.
 
 ## Modèle « nombre de médicaments »
 1. Dans le notebook, la cellule 4.6 crée `modele_medicaments.joblib`.
@@ -44,7 +45,16 @@ préparation des données est dans `readmit_core.py`, l'entraînement dans `trai
 - Build : `pip install -r requirements.txt` · Start : `gunicorn app:app --workers 1 --threads 4 --timeout 120`
 - Variable `PYTHON_VERSION` = `3.12.7`
 
+## Profils de santé (clustering CDC)
+Module `profils_app.py` + `cluster_service.py`. Fichiers : `models/profils/model_cdc_diabetes.joblib` et
+`models/profils/cluster_dashboard_data.json`. Tests : `tests/test_profils.py`.
+
 ## Important : versions
-`requirements.txt` fige `scikit-learn==1.8.0` (version du modèle « issue »). Le modèle « durée de séjour » a été
-entraîné avec la 1.6.1 : `compat.py` permet de le relire. Pour une compatibilité propre, ré-exportez ce modèle
-depuis son notebook avec scikit-learn 1.8.0 et remplacez les fichiers de `models/sejour/`.
+Tout le site utilise `scikit-learn==1.8.0`. Les modèles « durée de séjour » (`models/sejour/`) ont été ré-exportés
+avec cette version (performances identiques : MAE test 2,182 en A et 1,682 en B). Le modèle « réadmission »
+a été entraîné avec ces mêmes versions. `compat.py` n'est plus nécessaire pour la durée de séjour ; il reste pour
+relire d'anciens fichiers .joblib de scikit-learn 1.6.1.
+Le modèle « médicaments » (`models/medicaments/modele_medicaments.joblib`) doit encore être ajouté par son auteur.
+
+## Tests
+`python -m unittest discover -s tests -t . -v`

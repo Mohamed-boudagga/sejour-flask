@@ -4,7 +4,6 @@ import logging
 import math
 from pathlib import Path
 
-import compat  # noqa: F401  (doit précéder joblib.load)
 import joblib
 import numpy as np
 import pandas as pd

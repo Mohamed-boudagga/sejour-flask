@@ -21,7 +21,7 @@ footer{color:var(--mu);font-size:.82rem;margin-top:32px}
 <div class="wrap">
   <p class="eyebrow">PROJET MACHINE LEARNING</p>
   <h1>Parcours hospitalier des patients diabétiques</h1>
-  <p class="lead">Quatre modèles complémentaires : durée de séjour, issue du séjour, nombre de médicaments et réadmission à 30 jours. Choisissez un outil.</p>
+  <p class="lead">Cinq outils complémentaires : durée de séjour, issue du séjour, nombre de médicaments, réadmission à 30 jours et profils de santé. Choisissez un outil.</p>
   {% if erreur %}<div class="err" role="alert">{{ erreur }}</div>{% endif %}
   <div class="cards">
     <a class="card" href="{{ url_for('sejour.index') }}">
@@ -42,6 +42,11 @@ footer{color:var(--mu);font-size:.82rem;margin-top:32px}
     <a class="card" href="{{ url_for('readmission.index') }}">
       <h2>Réadmission à 30 jours</h2>
       <p>Repérez les patients les plus susceptibles de revenir à l'hôpital dans le mois suivant leur sortie (classification, XGBoost).</p>
+      <span class="go">Ouvrir →</span>
+    </a>
+    <a class="card" href="{{ url_for('profils.index') }}">
+      <h2>Profils de santé</h2>
+      <p>Explorez les groupes de profils de santé et de mode de vie issus d'un clustering non supervisé (K-Means, CDC Diabetes Health Indicators).</p>
       <span class="go">Ouvrir →</span>
     </a>
   </div>
