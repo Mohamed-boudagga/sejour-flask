@@ -3,6 +3,7 @@
   /          page d'accueil (navigation)
   /sejour/   durée de séjour (scénarios A et B)      -> sejour_app.py
   /issue/    issue du séjour (risque de décès)        -> issue_app.py
+  /medicaments/  nombre de médicaments (régression)   -> medicaments_app.py
   /health    état du service (utilisé par Render)
 
 Render démarre ce fichier avec :  gunicorn app:app
@@ -12,6 +13,7 @@ import logging
 from flask import Flask, jsonify, render_template, request
 
 import issue_app
+import medicaments_app
 import sejour_app
 
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +24,7 @@ app.config["JSON_AS_ASCII"] = False
 
 app.register_blueprint(sejour_app.bp)
 app.register_blueprint(issue_app.bp)
+app.register_blueprint(medicaments_app.bp)
 
 
 @app.get("/")
@@ -33,10 +36,12 @@ def accueil():
 def health():
     # Toujours 200 tant que le site tourne : un modèle défaillant n'empêche pas l'autre de fonctionner.
     sejour_ok = sejour_app.LOAD_ERROR is None
+    med_ok = medicaments_app.LOAD_ERROR is None
     return jsonify(
-        statut="ok" if sejour_ok else "partiel",
+        statut="ok" if (sejour_ok and med_ok) else "partiel",
         sejour={"ok": sejour_ok, "modeles": sorted(sejour_app.PIPES), "detail": sejour_app.LOAD_ERROR},
         issue={"ok": True, "modele": "Gradient Boosting"},
+        medicaments={"ok": med_ok, "modele": (medicaments_app.ART or {}).get("nom_modele"), "detail": medicaments_app.LOAD_ERROR},
     )
 
 

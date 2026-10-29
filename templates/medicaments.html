@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estimation du nombre de médicaments · Patients diabétiques</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07142b;--card:#0c1f3f;--bd:#26405f;--tx:#eaf1ff;--mu:#93a4bf;--ac:#38c8f5;--warn:#f59e42;--bad:#ef5b5b;--ok:#3ccf91}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Manrope,'Segoe UI',Arial,sans-serif;line-height:1.5}
+header{padding:36px 6vw 8px}header p{color:var(--ac);font-weight:700;letter-spacing:.08em;margin:0;font-size:.85rem}
+h1{margin:6px 0 4px;font-size:clamp(1.6rem,3.2vw,2.4rem)}header span{color:var(--mu)}
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:28px;padding:20px 6vw 48px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--bd);background:var(--card);border-radius:16px;padding:18px 22px;margin:0 0 18px}
+legend{color:var(--ac);font-weight:800;padding:0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mu);gap:4px}
+input[type=number],select{background:#07142b;color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px;font:inherit}
+input:focus,select:focus{outline:2px solid var(--ac)}
+.hint{font-size:.74rem;color:var(--mu);opacity:.85}
+.note{color:var(--mu);font-size:.8rem;margin:10px 0 0}
+button{width:100%;background:var(--ac);color:#07142b;border:0;border-radius:12px;padding:15px;font:800 1rem Manrope,sans-serif;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+aside{position:sticky;top:20px}
+.res{border:2px solid var(--bd);background:var(--card);border-radius:18px;padding:24px}
+.big{font-size:3.6rem;font-weight:800;line-height:1;margin:8px 0 4px;color:var(--ac)}
+.scale{position:relative;height:14px;border-radius:7px;background:var(--bd);margin:18px 0 6px}
+.scale .rng{position:absolute;top:0;bottom:0;background:var(--ac);opacity:.35;border-radius:7px}
+.scale .pt{position:absolute;top:-4px;width:6px;height:22px;background:var(--ac);border-radius:3px}
+.ticks{display:flex;justify-content:space-between;color:var(--mu);font-size:.75rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stats div{background:#07142b;border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.stats b{display:block;font-size:1.15rem;color:var(--tx)}.stats span{font-size:.72rem;color:var(--mu)}
+.err{background:#3a1620;border:1px solid var(--bad);padding:12px 16px;border-radius:12px;margin-bottom:14px}
+.warn{background:#33260f;border:1px solid var(--warn);padding:12px 16px;border-radius:12px;margin-bottom:14px}
+.empty{color:var(--mu)}footer{padding:0 6vw 36px;color:var(--mu);font-size:.82rem}
+</style></head><body>
+{% set active = 'medicaments' %}{% include '_nav.html' %}
+<header><p>PROJET ML · RÉGRESSION</p><h1>Estimer le nombre de médicaments d'un séjour</h1>
+<span>Modèle {{ m.nom }}{% if m.r2 is not none %} · R² test {{ ('%.3f'|format(m.r2))|replace('.',',') }}{% endif %}{% if m.mae is not none %} · erreur moyenne {{ ('%.1f'|format(m.mae))|replace('.',',') }} médicaments{% endif %}{% if m.pct3 is not none %} · {{ m.pct3|round|int }} % des prédictions à ±3{% endif %}</span></header>
+{% if load_error %}
+<main style="display:block"><div class="err" role="alert"><b>Modèle non chargé.</b> {{ load_error }}</div></main>
+{% else %}
+<main>
+<form method="post" action="{{ url_for('medicaments.index') }}" novalidate>
+<fieldset><legend>Séjour et patient</legend><div class="grid">
+{% for f in num_fields %}
+{% if f.kind == 'age' %}
+<label>{{ f.label }}<select name="{{ f.name }}">{% for v,lab in f.options %}<option value="{{ v }}" {{ 'selected' if form.get(f.name, '65')==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% else %}
+<label>{{ f.label }}<input type="number" name="{{ f.name }}" min="0" {% if f.max %}max="{{ f.max }}"{% endif %} step="1" required value="{{ form.get(f.name, '') }}" placeholder="0{% if f.max %} – {{ f.max }}{% endif %}">{% if f.help %}<span class="hint">{{ f.help }}</span>{% endif %}</label>
+{% endif %}
+{% endfor %}</div></fieldset>
+<fieldset><legend>Caractéristiques</legend><div class="grid">
+{% for f in cat_fields %}
+<label>{{ f.label }}<select name="{{ f.name }}">{% for v,lab in f.options %}<option value="{{ v }}" {{ 'selected' if form.get(f.name, f.default)==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% endfor %}</div></fieldset>
+<button type="submit">Estimer le nombre de médicaments</button>
+</form>
+<aside>
+{% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+{% if result %}
+{% for w in result.avertissements %}<div class="warn">{{ w }}</div>{% endfor %}
+<div class="res"><div class="empty">Estimation pour ce séjour</div>
+<div class="big">≈ {{ result.arrondi }}</div><div class="empty">médicaments distincts ({{ result.medicaments|string|replace('.',',') }} avant arrondi)</div>
+{% if result.intervalle %}{% set top = [40, result.intervalle[1] + 5]|max %}
+<div class="scale"><div class="rng" style="left:{{ result.intervalle[0] / top * 100 }}%;width:{{ (result.intervalle[1] - result.intervalle[0]) / top * 100 }}%"></div><div class="pt" style="left:calc({{ result.medicaments / top * 100 }}% - 3px)"></div></div>
+<div class="ticks"><span>0</span><span>{{ top }}</span></div>
+<p class="note">Zone claire : estimation ± l'erreur moyenne du modèle ({{ result.erreur_moyenne|string|replace('.',',') }}), soit de {{ result.intervalle[0] }} à {{ result.intervalle[1] }} médicaments. C'est un ordre de grandeur, pas un intervalle de confiance.</p>
+<div class="stats"><div><b>{{ m.pct3|round|int if m.pct3 is not none else '–' }} %</b><span>des prédictions à ±3 sur le test</span></div><div><b>{{ ('%.2f'|format(m.mae))|replace('.',',') if m.mae is not none else '–' }}</b><span>erreur moyenne (MAE)</span></div><div><b>{{ ('%.3f'|format(m.r2))|replace('.',',') if m.r2 is not none else '–' }}</b><span>R² sur le test</span></div></div>
+{% endif %}</div>
+{% else %}<div class="res empty">Renseigne le séjour puis lance l'estimation. Le modèle donne un volume de médicaments utile à la pharmacie, plus fiable sur un groupe de patients que sur un patient seul.</div>{% endif %}
+</aside></main>
+{% endif %}
+<footer>Outil pédagogique issu d'un projet de data science (jeu « Diabetes 130-US hospitals »). Il estime un volume de médicaments, il ne choisit pas les médicaments et ne remplace pas un avis médical. Les séjours à plus de 30 médicaments sont sous-estimés ; la durée de séjour n'est connue qu'à la sortie.</footer>
+</body></html>

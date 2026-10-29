@@ -1,17 +1,28 @@
 # Projet ML · Patients diabétiques
 
-Un seul site Flask, deux outils :
+Un seul site Flask, trois outils :
 
 | Adresse    | Outil                                             | Code            |
 |------------|---------------------------------------------------|-----------------|
 | `/`        | Accueil (navigation)                              | `app.py`        |
 | `/sejour/` | Durée de séjour (scénarios A et B)                | `sejour_app.py` |
 | `/issue/`  | Issue du séjour (risque de décès)                 | `issue_app.py`  |
+| `/medicaments/` | Nombre de médicaments (régression, LightGBM) | `medicaments_app.py` |
 | `/health`  | État du service                                   | `app.py`        |
 
-API JSON : `POST /sejour/api/predict`, `GET /sejour/api/schema`, `POST /issue/api/predict`.
+API JSON : `POST /sejour/api/predict`, `GET /sejour/api/schema`, `POST /issue/api/predict`, `POST /medicaments/api/predict`, `GET /medicaments/api/schema`.
 
-## Ajouter un 3e modèle plus tard
+## Modèle « nombre de médicaments »
+1. Dans le notebook, la cellule 4.6 crée `modele_medicaments.joblib`.
+2. Copier ce fichier dans `models/medicaments/` (voir `LISEZ-MOI.txt`). Sans lui, la page affiche un message d'aide
+   et le reste du site fonctionne.
+3. Le formulaire est généré à partir des variables stockées dans le fichier : si les 7 variables changent, remplacer
+   simplement le fichier.
+4. Tests : `python -m unittest tests.test_medicaments -v` (modèle factice, plus un test sur le vrai fichier s'il existe).
+   Le modèle est un LightGBM : `lightgbm` est dans `requirements.txt`. Si la page signale une version de
+   scikit-learn différente, ré-exporter le fichier avec scikit-learn 1.8.0 (voir plus bas).
+
+## Ajouter un autre modèle plus tard
 1. Créer `mon_modele_app.py` avec un `Blueprint("mon_modele", __name__, url_prefix="/mon_modele")`.
 2. Mettre le modèle dans `models/mon_modele/` et la page dans `templates/mon_modele.html`.
 3. Dans `app.py` : `import mon_modele_app` puis `app.register_blueprint(mon_modele_app.bp)`.

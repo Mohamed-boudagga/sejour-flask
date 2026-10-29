@@ -21,7 +21,7 @@ footer{color:var(--mu);font-size:.82rem;margin-top:32px}
 <div class="wrap">
   <p class="eyebrow">PROJET MACHINE LEARNING</p>
   <h1>Parcours hospitalier des patients diabétiques</h1>
-  <p class="lead">Deux modèles complémentaires : l'un estime la durée de séjour, l'autre prédit l'issue du séjour. Choisissez un outil.</p>
+  <p class="lead">Trois modèles complémentaires : durée de séjour, issue du séjour et nombre de médicaments. Choisissez un outil.</p>
   {% if erreur %}<div class="err" role="alert">{{ erreur }}</div>{% endif %}
   <div class="cards">
     <a class="card" href="{{ url_for('sejour.index') }}">
@@ -32,6 +32,11 @@ footer{color:var(--mu);font-size:.82rem;margin-top:32px}
     <a class="card" href="{{ url_for('issue.index') }}">
       <h2>Issue du séjour</h2>
       <p>Évaluez le risque de décès d'un patient à partir de son profil et de sa biologie (Gradient Boosting).</p>
+      <span class="go">Ouvrir →</span>
+    </a>
+    <a class="card" href="{{ url_for('medicaments.index') }}">
+      <h2>Nombre de médicaments</h2>
+      <p>Estimez combien de médicaments seront administrés pendant un séjour, pour planifier la pharmacie (régression, LightGBM).</p>
       <span class="go">Ouvrir →</span>
     </a>
   </div>

@@ -11,4 +11,5 @@
   <a href="{{ url_for('accueil') }}" {% if active == 'accueil' %}class="on"{% endif %}>Accueil</a>
   <a href="{{ url_for('sejour.index') }}" {% if active == 'sejour' %}class="on"{% endif %}>Durée de séjour</a>
   <a href="{{ url_for('issue.index') }}" {% if active == 'issue' %}class="on"{% endif %}>Issue du séjour</a>
+  <a href="{{ url_for('medicaments.index') }}" {% if active == 'medicaments' %}class="on"{% endif %}>Médicaments</a>
 </div></nav>
