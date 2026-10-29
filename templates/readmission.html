@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Risque de réadmission à 30 jours · Patients diabétiques</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07142b;--card:#0c1f3f;--bd:#26405f;--tx:#eaf1ff;--mu:#93a4bf;--ac:#38c8f5;--warn:#f59e42;--bad:#ef5b5b;--ok:#3ccf91}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Manrope,'Segoe UI',Arial,sans-serif;line-height:1.5}
+header{padding:36px 6vw 8px}header p{color:var(--ac);font-weight:700;letter-spacing:.08em;margin:0;font-size:.85rem}
+h1{margin:6px 0 4px;font-size:clamp(1.6rem,3.2vw,2.4rem)}header span{color:var(--mu)}
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:28px;padding:20px 6vw 48px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--bd);background:var(--card);border-radius:16px;padding:18px 22px;margin:0 0 18px}
+legend{color:var(--ac);font-weight:800;padding:0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mu);gap:4px}
+input[type=number],select{background:#07142b;color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px;font:inherit}
+input:focus,select:focus{outline:2px solid var(--ac)}
+.hint{font-size:.74rem;color:var(--mu);opacity:.85}
+.note{color:var(--mu);font-size:.8rem;margin:10px 0 0}
+button{width:100%;background:var(--ac);color:#07142b;border:0;border-radius:12px;padding:15px;font:800 1rem Manrope,sans-serif;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+aside{position:sticky;top:20px}
+.res{border:2px solid var(--bd);background:var(--card);border-radius:18px;padding:24px}
+.big{font-size:3.6rem;font-weight:800;line-height:1;margin:8px 0 4px;color:var(--ac)}
+.scale{position:relative;height:14px;border-radius:7px;background:var(--bd);margin:18px 0 6px}
+.scale .rng{position:absolute;top:0;bottom:0;background:var(--ac);opacity:.35;border-radius:7px}
+.scale .pt{position:absolute;top:-4px;width:6px;height:22px;background:var(--ac);border-radius:3px}
+.ticks{display:flex;justify-content:space-between;color:var(--mu);font-size:.75rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stats div{background:#07142b;border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.stats b{display:block;font-size:1.15rem;color:var(--tx)}.stats span{font-size:.72rem;color:var(--mu)}
+.err{background:#3a1620;border:1px solid var(--bad);padding:12px 16px;border-radius:12px;margin-bottom:14px}
+.warn{background:#33260f;border:1px solid var(--warn);padding:12px 16px;border-radius:12px;margin-bottom:14px}
+.empty{color:var(--mu)}footer{padding:0 6vw 36px;color:var(--mu);font-size:.82rem}
+.chip{display:inline-block;padding:6px 18px;border-radius:20px;font-weight:800;color:#07142b}
+.c-ok{background:var(--ok)}.c-warn{background:var(--warn)}.c-bad{background:var(--bad)}
+.chk{flex-direction:row;align-items:center;gap:8px;color:var(--tx);font-size:.9rem}
+.chk input{accent-color:var(--ac);width:18px;height:18px}
+.pbar{height:14px;border-radius:7px;background:var(--bd);margin:10px 0 6px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--ac)}
+details summary{cursor:pointer;color:var(--mu);font-size:.85rem;margin-top:12px}
+</style></head><body>
+{% set active = 'readmission' %}{% include '_nav.html' %}
+<header><p>PROJET ML · CLASSIFICATION</p><h1>Risque de réadmission à 30 jours</h1>
+<span>Modèle {{ m.nom }}{% if m.auc is not none %} · AUC test {{ ('%.2f'|format(m.auc))|replace('.',',') }}{% endif %}{% if m.top10 is not none %} · {{ (m.top10*100)|round|int }} % des réadmissions dans le top 10 % des scores{% endif %}</span></header>
+{% if load_error %}
+<main style="display:block"><div class="err" role="alert"><b>Modèle non chargé.</b> {{ load_error }}</div></main>
+{% else %}
+<main>
+<form method="post" action="{{ url_for('readmission.index') }}" novalidate>
+<fieldset><legend>Patient</legend><div class="grid">
+<label>Tranche d'âge<select name="age">{% for v,lab in age_options %}<option value="{{ v }}" {{ 'selected' if form.get('age', age_default)==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% for f in cat_fields if f.name in ['gender','race','weight','payer_code','medical_specialty'] %}
+<label>{{ f.label }}<select name="{{ f.name }}">{% for v,lab in f.options %}<option value="{{ v }}" {{ 'selected' if form.get(f.name, f.default)==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% endfor %}</div></fieldset>
+<fieldset><legend>Ce séjour</legend><div class="grid">
+{% for f in cat_fields if f.name in ['admission_type','admission_source','discharge_group'] %}
+<label>{{ f.label }}<select name="{{ f.name }}">{% for v,lab in f.options %}<option value="{{ v }}" {{ 'selected' if form.get(f.name, f.default)==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% endfor %}
+{% for n,lab,lo,hi,d,hlp in num_fields if n in ['time_in_hospital','num_lab_procedures','num_procedures','num_medications','number_diagnoses'] %}
+<label>{{ lab }}<input type="number" name="{{ n }}" min="{{ lo }}" max="{{ hi }}" step="1" required value="{{ form.get(n, d) }}"><span class="hint">{{ hlp }} ({{ lo }} – {{ hi }})</span></label>
+{% endfor %}</div></fieldset>
+<fieldset><legend>Antécédents et traitement</legend><div class="grid">
+{% for n,lab,lo,hi,d,hlp in num_fields if n in ['number_outpatient','number_emergency','number_inpatient','n_meds_used','n_meds_changed'] %}
+<label>{{ lab }}<input type="number" name="{{ n }}" min="{{ lo }}" max="{{ hi }}" step="1" required value="{{ form.get(n, d) }}"><span class="hint">{{ hlp }} ({{ lo }} – {{ hi }})</span></label>
+{% endfor %}
+{% for f in cat_fields if f.name in ['diag_1_group','diag_2_group','diag_3_group','A1Cresult','max_glu_serum','insulin'] %}
+<label>{{ f.label }}<select name="{{ f.name }}">{% for v,lab in f.options %}<option value="{{ v }}" {{ 'selected' if form.get(f.name, f.default)==v }}>{{ lab }}</option>{% endfor %}</select></label>
+{% endfor %}
+{% for n,lab,d in bin_fields %}
+<label class="chk"><input type="checkbox" name="{{ n }}" value="1" {{ 'checked' if ((n in form) if posted else d) }}>{{ lab }}</label>
+{% endfor %}</div></fieldset>
+<button type="submit">Estimer le risque</button>
+</form>
+<aside>
+{% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+{% if result %}
+<div class="res"><span class="chip {{ 'c-bad' if result.top10 else ('c-warn' if result.alerte else 'c-ok') }}">{{ result.niveau }}</span>
+<div class="big">{{ result.percentile }} %</div><div class="empty">des patients ont un score plus faible que ce patient</div>
+<div class="pbar"><i style="width:{{ result.percentile }}%"></i></div>
+<p class="note">Score du modèle : <b>{{ ('%.2f'|format(result.score))|replace('.',',') }}</b> · seuil d'alerte : {{ ('%.2f'|format(m.seuil))|replace('.',',') if m.seuil is not none else '–' }}.</p>
+{% if result.top10 %}<div class="warn">Ce patient est dans les 10 % les plus à risque : le groupe à suivre en priorité après la sortie.</div>{% endif %}
+<p class="note">Ce score sert à <b>classer</b> les patients, ce n'est pas une probabilité : le modèle est entraîné avec des poids de classes car seuls ~9 % des patients sont réadmis rapidement. Utilisez le rang (percentile) pour comparer.</p>
+<details><summary>À propos du modèle</summary>
+<div class="stats"><div><b>{{ ('%.2f'|format(m.auc))|replace('.',',') if m.auc is not none else '–' }}</b><span>AUC (test)</span></div><div><b>{{ (m.rappel*100)|round|int if m.rappel is not none else '–' }} %</b><span>rappel</span></div><div><b>{{ (m.precision*100)|round|int if m.precision is not none else '–' }} %</b><span>précision</span></div></div>
+<p class="note">Variables utilisées : {{ m.variables|join(', ') }}.</p></details></div>
+{% else %}<div class="res empty">Renseigne le patient et son séjour puis lance l'estimation. Le modèle classe les patients selon leur risque de revenir à l'hôpital dans les 30 jours.</div>{% endif %}
+</aside></main>
+{% endif %}
+<footer>Outil d'aide à la décision issu d'un projet de data science (jeu « Diabetes 130-US hospitals », un seul séjour par patient). Projet pédagogique : il ne remplace pas un avis médical et n'a pas été validé pour un usage clinique.</footer>
+</body></html>

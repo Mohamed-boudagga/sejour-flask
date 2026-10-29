@@ -1,0 +1,6 @@
+Placez ici le fichier  model.joblib  produit par :
+
+    python train_readmission.py --data data/diabetic_data.csv
+
+(à lancer avec les versions de requirements.txt, voir README). Tant qu'il est absent, la page /readmission/
+affiche un message d'aide et le reste du site fonctionne normalement.
