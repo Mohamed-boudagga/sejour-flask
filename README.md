@@ -54,7 +54,7 @@ Tout le site utilise `scikit-learn==1.8.0`. Les modèles « durée de séjour »
 avec cette version (performances identiques : MAE test 2,182 en A et 1,682 en B). Le modèle « réadmission »
 a été entraîné avec ces mêmes versions. `compat.py` n'est plus nécessaire pour la durée de séjour ; il reste pour
 relire d'anciens fichiers .joblib de scikit-learn 1.6.1.
-Le modèle « médicaments » (`models/medicaments/modele_medicaments.joblib`) doit encore être ajouté par son auteur.
+Le modèle « médicaments » (`models/medicaments/modele_medicaments.joblib`, scikit-learn 1.6.1) est relu grâce à `compat.py` : ne pas supprimer ce fichier. Pour une compatibilité propre, son auteur peut le ré-exporter avec scikit-learn 1.8.0.
 
 ## Tests
 `python -m unittest discover -s tests -t . -v`
